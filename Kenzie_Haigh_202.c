@@ -18,7 +18,10 @@ uint8_t rs = B1, en = B0;
 
 LiquidCrystal lcd(rs, en, D4, D5, D6, D7);
 
-char friend_qs[5][64] = {
+
+int f_qs_nm = 5 //Number of questions in friends_questions
+
+char friend_qs[f_qs_nm][64] = {
                          "Better Cook",
                          "Better Driver",
                          "Cleaner"
@@ -40,7 +43,7 @@ int main(void) {
 
     start();
     _delay_ms(1000);
-    display_question(1);
+    display_question(rand() % f_qs_nm);
     display_responder();
 
     while (1) {
@@ -80,7 +83,7 @@ void display_question(int num){
 
     lcd.setCursor(1, 0);
     lcd.print(friend_qs[num]);
-    lcd.print("?")
+    lcd.print("?");
 
 
 
@@ -91,6 +94,9 @@ void display_responder(void){
     lcd.setCursor(1,1);
     lcd.print("You");
 
-    lcd.setCursor(13, 1);
+    lcd.setCursor(8,1);
+    lcd.print("/");
+
+    lcd.setCursor(12, 1);
     lcd.print("Me");
 }
