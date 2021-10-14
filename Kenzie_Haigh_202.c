@@ -23,7 +23,7 @@ char friend_qs[5][64] = {
                          "Better Driver",
                          "Cleaner"
                          "More on time"
-                         "Faster Responder"
+                         "Faster Texter"
                      };
 
 
@@ -31,6 +31,7 @@ char friend_qs[5][64] = {
 
 void start(void);
 void display_question(void);
+void display_responder(void);
 
 
 
@@ -40,6 +41,7 @@ int main(void) {
     start();
     _delay_ms(1000);
     display_question(1);
+    display_responder();
 
     while (1) {
 
@@ -76,11 +78,19 @@ void display_question(int num){
 
     lcd.clear();
 
-    lcd.setCursor(0, 0);
+    lcd.setCursor(1, 0);
     lcd.print(friend_qs[num]);
+    lcd.print("?")
 
 
 
 }
 
 
+void display_responder(void){
+    lcd.setCursor(1,1);
+    lcd.print("You");
+
+    lcd.setCursor(13, 1);
+    lcd.print("Me");
+}
