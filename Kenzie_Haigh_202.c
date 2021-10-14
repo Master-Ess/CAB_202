@@ -18,14 +18,18 @@ uint8_t rs = B1, en = B0;
 
 LiquidCrystal lcd(rs, en, D4, D5, D6, D7);
 
+char friend_qs[5][64] = {
+                         "Better Cook",
+                         "Better Driver",
+                         "Cleaner"
+                         "More on time"
+                         "Faster Responder"
+                     };
 
 
 
 
-// funciton defs
-
-void setup_lcd(void);
-void loop(void);
+void start(void);
 void display_question(void);
 
 
@@ -33,7 +37,9 @@ void display_question(void);
 
 int main(void) {
 
-    setup_lcd();
+    start();
+    _delay_ms(1000);
+    display_question(1);
 
     while (1) {
 
@@ -45,7 +51,7 @@ int main(void) {
 }
 
 
-void setup_lcd(void) {
+void start(void) {
 
     // Initialises LCD
     lcd.begin(16, 2);
@@ -64,9 +70,16 @@ void setup_lcd(void) {
     lcd.setCursor(7, 1);
     lcd.print("Me?");
 
-    //register 4 new character bitmaps as character codes 0-3
-  
-    //lcd.blink();
+}
+
+void display_question(int num){
+
+    lcd.clear();
+
+    lcd.setCursor(0, 0);
+    lcd.print(friend_qs[num]);
+
+
 
 }
 
