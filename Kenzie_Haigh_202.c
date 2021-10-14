@@ -96,7 +96,7 @@ void setup_lcd(void) {
 
     lcd.setCursor(5, 0);
     lcd.print("You or");
-    lcd.setCursor(5, 1);
+    lcd.setCursor(7, 1);
     lcd.print("Me?");
 
     //register 4 new character bitmaps as character codes 0-3
