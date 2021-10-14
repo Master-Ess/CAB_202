@@ -19,51 +19,16 @@ uint8_t rs = B1, en = B0;
 LiquidCrystal lcd(rs, en, D4, D5, D6, D7);
 
 
-//=================================================
-//=================================================
-//=================================================
-//                Example code
-//=================================================
-//=================================================
-//=================================================
 
 
-uint8_t bmp0[8] = { 0b00010010,
-                    0b00001010,
-                    0b00001001,
-                    0b00000100,
-                    0b00000100,
-                    0b00010010,
-                    0b00001010,
-                    0b00001001 };
-uint8_t bmp1[8] = { 0b00010101,
-                    0b00010101,
-                    0b00010101,
-                    0b00010101,
-                    0b00010101,
-                    0b00010101,
-                    0b00010101,
-                    0b00010101 };
-uint8_t bmp2[8] = { 0b00001001,
-                    0b00001010,
-                    0b00010010,
-                    0b00000100,
-                    0b00000100,
-                    0b00001001,
-                    0b00001010,
-                    0b00010010 };
-uint8_t bmp3[8] = { 0b00000000,
-                    0b00011111,
-                    0b00000000,
-                    0b00011111,
-                    0b00000000,
-                    0b00011111,
-                    0b00000000,
-                    0b00011111 };
 
+// funciton defs
 
 void setup_lcd(void);
 void loop(void);
+void display_question(void);
+
+
 
 
 int main(void) {
@@ -106,48 +71,3 @@ void setup_lcd(void) {
 }
 
 
-void loop_ch(void) {
-    static uint8_t frame = 0;
-
-    //write the custom character bitmaps one at a time to make an animation
-    if (frame == 0) {
-        lcd.setCursor(1, 0);
-        lcd.write((unsigned char)0);
-        lcd.write((unsigned char)1);
-        lcd.setCursor(1, 1);
-        lcd.write((unsigned char)2);
-        lcd.write((unsigned char)3);
-    }
-    else if (frame == 1) {
-        lcd.setCursor(1, 0);
-        lcd.write((unsigned char)1);
-        lcd.write((unsigned char)2);
-        lcd.setCursor(1, 1);
-        lcd.write((unsigned char)3);
-        lcd.write((unsigned char)0);
-    }
-    else if (frame == 2) {
-        lcd.setCursor(1, 0);
-        lcd.write((unsigned char)2);
-        lcd.write((unsigned char)3);
-        lcd.setCursor(1, 1);
-        lcd.write((unsigned char)0);
-        lcd.write((unsigned char)1);
-    }
-    else if (frame == 3) {
-        lcd.setCursor(1, 0);
-        lcd.write((unsigned char)3);
-        lcd.write((unsigned char)0);
-        lcd.setCursor(1, 1);
-        lcd.write((unsigned char)1);
-        lcd.write((unsigned char)2);
-    }
-
-    if (frame % 2 == 0) {
-        lcd.scrollDisplayLeft();
-    }
-    else {
-        lcd.scrollDisplayRight();
-    }
-    frame = (frame + 1) % 4;
-}
