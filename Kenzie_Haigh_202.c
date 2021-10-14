@@ -19,13 +19,13 @@ uint8_t rs = B1, en = B0;
 LiquidCrystal lcd(rs, en, D4, D5, D6, D7);
 
 
-int f_qs_nm = 5 //Number of questions in friends_questions
+const int f_qs_nm = 5; //Number of questions in friends_questions
 
 char friend_qs[f_qs_nm][64] = {
                          "Better Cook",
                          "Better Driver",
-                         "Cleaner"
-                         "More on time"
+                         "Cleaner",
+                         "More on time",
                          "Faster Texter"
                      };
 
@@ -43,7 +43,7 @@ int main(void) {
 
     start();
     _delay_ms(1000);
-    display_question(rand() % f_qs_nm);
+    display_question((rand() % f_qs_nm)); // currently always gives question 2???
     display_responder();
 
     while (1) {
@@ -81,8 +81,12 @@ void display_question(int num){
 
     lcd.clear();
 
-    lcd.setCursor(1, 0);
-    lcd.print(friend_qs[num]);
+
+    char *question = friend_qs[num];
+    int question_start = 7 - (strlen(question)/2); //AUTO CENTER 
+
+    lcd.setCursor(question_start, 0);
+    lcd.print(question);
     lcd.print("?");
 
 
