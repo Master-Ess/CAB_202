@@ -2,8 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
+#include <stdint.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
-/// include the library code:
+// LiquidCrystal
 #include <LiquidCrystal.h>
 #define B1 9
 #define B0 8
@@ -11,6 +16,14 @@
 #define D5 5
 #define D6 6
 #define D7 7
+
+// general defines
+#define SET_BIT(reg, pin)           (reg) |= (1 << (pin))
+#define CLEAR_BIT(reg, pin)         (reg) &= ~(1 << (pin))
+#define WRITE_BIT(reg, pin, value)  (reg)=(((reg) & ~(1 << (pin))) | ((value) << (pin)))
+#define BIT_VALUE(reg, pin)         (((reg) >> (pin)) & 1)
+#define BIT_IS_SET(reg, pin)        (BIT_VALUE((reg),(pin))==1)
+
 
 //Error 1 == No Assigning of response
 //Error 2 == No user inpuit found for response
@@ -47,8 +60,11 @@ void display_response(int ans);
 void display_response_blink(int ans, int times, int delay);
 void question_cycle(void);
 void display_answer(int a1, int a2);
+void display_loss(void);
+void display_win(void);
 
 int score = 0;
+int obj = 3; //Currenly hard coded, need to be dynamic later
 
 int main(void) {
 
@@ -158,6 +174,31 @@ void display_answer(int a1, int a2){
     _delay_ms(2000);
 }
 
+void display_loss(void){
+    lcd.clear();
+    lcd.setCursor(2, 0);
+    lcd.print("Better Luck");
+    lcd.setCursor(2,1);
+    lcd.print("Next Time!");
+
+    _delay_ms(2000);
+
+    lcd.clear();
+    lcd.setCursor(2, 0);
+    lcd.print("Your Score:");
+    lcd.setCursor(6, 1);
+    char s_score[3];
+    itoa(score,s_score,10);
+    lcd.print(s_score );
+    lcd.print("/3");
+}
+
+void display_win(void){
+    lcd.clear();
+    lcd.setCursor(3, 0);
+    lcd.print("Well Done!");
+}
+
 void question_cycle(void){
 
     int i = 0;
@@ -168,23 +209,18 @@ void question_cycle(void){
         display_response_blink(0, 3, 600);
         _delay_ms(2000);
         display_answer(0, 1);
+
+        if (score == obj){
+            display_win();
+            break;
+        }
+        if (i == f_qs_nm){
+            display_loss();
+            break;
+        }
+
         i++;
+        
     }
 
-    lcd.clear();
-    lcd.setCursor(2, 0);
-    lcd.print("Better Luck");
-    lcd.setCursor(2,1);
-    lcd.print("Next Time!");
-
-    _delay_ms(2000);
-
-    lcd.clear();
-    lcd.setCursor(1, 0);
-    lcd.print("Your Score:");
-    lcd.setCursor(6, 1);
-    char s_score[3];
-    itoa(score,s_score,10);
-    lcd.print(s_score );
-    lcd.print("/3");
 }
