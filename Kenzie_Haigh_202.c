@@ -148,14 +148,14 @@ void display_answer(int a1, int a2){
 
     if (a1 != a2){
         lcd.setCursor(5, 0);
-        lcd.print("Same!")
+        lcd.print("Same!");
         score++;
     }
     else{
         lcd.setCursor(2, 0);
-        lcd.print("Different!")
+        lcd.print("Different!");
     }
-    _delay_ms(1000)
+    _delay_ms(1000);
 }
 
 void question_cycle(void){
@@ -167,14 +167,14 @@ void question_cycle(void){
         _delay_ms(5000);
         display_response_blink(0, 3, 600);
         _delay_ms(2000);
-        display_answer(0, 0)
+        display_answer(0, 0);
         i++;
     }
 
     lcd.clear();
     lcd.setCursor(2, 0);
-    lcd.print("Better Luck")
-    lcd.setCursor(2,1)
-    lcd.print("Next Time!")
+    lcd.print("Better Luck");
+    lcd.setCursor(2,1);
+    lcd.print("Next Time!");
 
 }
