@@ -25,8 +25,6 @@
 #define BIT_IS_SET(reg, pin)        (BIT_VALUE((reg),(pin))==1)
 
 
-//Error 1 == No Assigning of response
-//Error 2 == No user inpuit found for response
 
 // initialize the library by associating any needed LCD interface pin
 // with the Arduino pin number it is connected to
@@ -62,9 +60,15 @@ void question_cycle(void);
 void display_answer(int a1, int a2);
 void display_loss(void);
 void display_win(void);
+void __init__(void);
 
 int score = 0;
 int obj = 3; //Currenly hard coded, need to be dynamic later
+
+uint8_t counter_you = 0;
+uint8_t counter_me = 0;
+uint8_t is_pressed_you = 0; //A0
+uint8_t is_pressed_me = 0; //A1
 
 int main(void) {
 
@@ -85,7 +89,54 @@ int main(void) {
 }
 
 
+void __init__(void){ //Not Initalisation but the british way of say isnt it
+
+CLEAR_BIT(DDRC, 0); //Set pin A0 and A1 to input
+CLEAR_BIT(DDRC, 1);
+
+TCCR0A = 0;
+TCCR0B = 4;
+TIMSK0 = 1;
+
+
+sei(); //Interupts
+
+}
+
+
+
+ISR(TIM0_OVF_vect) { //Usually: TIMER0_OVF_vect
+
+
+    //You / Left button
+
+    counter_you = (((counter_you << 1) & 0b00000111) | ((PINC >> 0) & 1));
+
+    if (counter_you == 0b00000111) {
+        is_pressed_you = 1;
+    }
+
+    if (counter_you == 0) {
+        is_pressed_you = 0;
+    }
+
+    //Me / Right Button
+
+    counter_me = (((counter_me << 1) & 0b00000111) | ((PINC >> 1) & 1));
+
+    if (counter_me == 0b00000111) {
+        is_pressed_me = 1;
+    }
+
+    if (counter_you == 0) {
+        is_pressed_me = 0;
+    }
+}
+
 void start(void) {
+
+
+    __init__();
 
     // Initialises LCD
     lcd.begin(16, 2);
@@ -220,7 +271,5 @@ void question_cycle(void){
         }
 
         i++;
-        
     }
-
 }
