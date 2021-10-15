@@ -44,23 +44,18 @@ void start(void);
 void display_question(void);
 void display_responder(void);
 void display_response(int ans);
-void display_response_blink(int ans, int times);
+void display_response_blink(int ans, int times, int delay);
+void question_cycle(void);
+void display_answer(int a1, int a2);
 
-
-
+int score = 0;
 
 int main(void) {
 
     start();
     _delay_ms(1000);
-    display_question((rand() % f_qs_nm)); // currently always gives question 2???
-    display_responder();
-
-    _delay_ms(5000);
-
+    question_cycle();
     
-
-    display_response_blink(0, 3);
 
 
 
@@ -132,18 +127,54 @@ void display_response(int ans){
     
 }
 
-void display_response_blink(int ans, int times){
+void display_response_blink(int ans, int times, int delay){
 
     display_response(ans);
 
     int i = 0;
 
-    while (i >= times){
-       _delay_ms(300);
+    while (i <= times){
+    _delay_ms(delay);
     lcd.clear();
-    _delay_ms(300);
+    _delay_ms(delay);
     display_response(ans);
     i++;
     }
     
+}
+
+void display_answer(int a1, int a2){
+    lcd.clear();
+
+    if (a1 != a2){
+        lcd.setCursor(5, 0);
+        lcd.print("Same!")
+        score++;
+    }
+    else{
+        lcd.setCursor(2, 0);
+        lcd.print("Different!")
+    }
+    _delay_ms(1000)
+}
+
+void question_cycle(void){
+
+    int i = 0;
+    while (i < f_qs_nm){
+        display_question(i); // currently always gives question 2???
+        display_responder();
+        _delay_ms(5000);
+        display_response_blink(0, 3, 600);
+        _delay_ms(2000);
+        display_answer(0, 0)
+        i++;
+    }
+
+    lcd.clear();
+    lcd.setCursor(2, 0);
+    lcd.print("Better Luck")
+    lcd.setCursor(2,1)
+    lcd.print("Next Time!")
+
 }
