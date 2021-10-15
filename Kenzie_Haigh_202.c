@@ -152,10 +152,10 @@ void display_answer(int a1, int a2){
         score++;
     }
     else{
-        lcd.setCursor(2, 0);
+        lcd.setCursor(3, 0);
         lcd.print("Different!");
     }
-    _delay_ms(1000);
+    _delay_ms(2000);
 }
 
 void question_cycle(void){
@@ -167,7 +167,7 @@ void question_cycle(void){
         _delay_ms(5000);
         display_response_blink(0, 3, 600);
         _delay_ms(2000);
-        display_answer(0, 0);
+        display_answer(0, 1);
         i++;
     }
 
@@ -177,4 +177,14 @@ void question_cycle(void){
     lcd.setCursor(2,1);
     lcd.print("Next Time!");
 
+    _delay_ms(2000);
+
+    lcd.clear();
+    lcd.setCursor(1, 0);
+    lcd.print("Your Score:");
+    lcd.setCursor(6, 1);
+    char s_score[3];
+    itoa(score,s_score,10);
+    lcd.print(s_score );
+    lcd.print("/3");
 }
