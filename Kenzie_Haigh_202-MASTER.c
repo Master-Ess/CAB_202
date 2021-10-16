@@ -177,8 +177,8 @@ void display_question(int num){
 
     lcd.clear();
     
-    uart_put_string("DQ"); //Display Question
-
+    uart_put_string("81"); //Display Question
+	
     char payload[5];
     itoa(num,payload,10); //Covert Int to char for transmission
 
@@ -284,7 +284,7 @@ void question_cycle(void){
         int response = 2;
         
         for (;;){
-            
+            uart_put_string("82"); //Request an answer
             if (BIT_IS_SET(PINC, 0)){
                 response = 0;
                 break;
