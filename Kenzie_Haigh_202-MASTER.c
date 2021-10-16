@@ -25,6 +25,10 @@
 #define BIT_IS_SET(reg, pin)        (BIT_VALUE((reg),(pin))==1)
 
 
+//////////////////////////
+//CODE FOR MASTER
+//////////////////////////
+
 
 // initialize the library by associating any needed LCD interface pin
 // with the Arduino pin number it is connected to
@@ -74,6 +78,12 @@ int main(void) {
 
     start();
     _delay_ms(1000);
+
+
+    uart_init();
+  	//PL2---------
+    uart_put_string("Player 2");
+
     question_cycle();
     
 
@@ -270,10 +280,11 @@ void question_cycle(void){
                 response = 1;
                 break;
             }
+            _delay_ms(10); //Make it chug less but could also mean that it misses button presses
         }
 
         display_response_blink(response, 6, 200);
-        _delay_ms(2000);
+        _delay_ms(1000);
         display_answer(response, 1);
 
         if (score == obj){
@@ -287,4 +298,66 @@ void question_cycle(void){
 
         i++;
     }
+}
+
+//UART FUNCTIONS
+
+void uart_init(void) {
+
+    UBRR0 = F_CPU / 16 / 9600 - 1;
+    UCSR0A = 0;
+    UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+    UCSR0C = (3 << UCSZ00);
+}
+
+
+//BYTE GRAB AND RECEIVE
+
+void uart_putbyte(unsigned char data) {
+   
+    while (!(UCSR0A & (1 << UDRE0)));
+    UDR0 = data;
+}
+
+int uart_getbyte(unsigned char* buffer) {
+    // If receive buffer contains data...
+    if (UCSR0A & (1 << RXC0)) {
+        // Copy received byte from UDR0 into memory location (*buffer)
+        *buffer = UDR0;
+        // 
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+//STRING CONSTRUCT AND DECONSTRUCT
+
+void uart_put_string(char s[]) {
+    int i = 0;
+    while (s[i] != 0) {
+        uart_putbyte(s[i]);
+        i++;
+    }
+    uart_putbyte(0);
+}
+
+
+
+void uart_get_string(char buff[], int buff_len) {
+    int i = 0;
+    unsigned char ch;
+    for (;;) {
+        while (!uart_getbyte(&ch)) {}
+        if (ch == 0) {
+            break;
+        }
+        if (i < (buff_len - 1)) { // < > look for inequalitiies 
+            buff[i] = ch;
+            i++;
+        }
+    }
+    buff[i] = 0;
+
 }
