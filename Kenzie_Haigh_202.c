@@ -256,10 +256,25 @@ void question_cycle(void){
     while (i < f_qs_nm){
         display_question(i); // currently always gives question 2???
         display_responder();
-        _delay_ms(5000);
-        display_response_blink(0, 3, 600);
+        //_delay_ms(5000);
+
+        int response = 2;
+        
+        for (;;){
+            
+            if (BIT_IS_SET(PINC, 0)){
+                response = 0;
+                break;
+            }
+            if (BIT_IS_SET(PINC, 1)){
+                response = 1;
+                break;
+            }
+        }
+
+        display_response_blink(response, 6, 200);
         _delay_ms(2000);
-        display_answer(0, 1);
+        display_answer(response, 1);
 
         if (score == obj){
             display_win();
