@@ -87,12 +87,12 @@ int main(void) {
     lcd.setCursor(0,0);
     lcd.print(buffer);
     _delay_ms(500);
-
+    for (;;){
     uart_get_string(buffer, 20);
     
   	int compare = atoi(buffer);
+
     if (compare == 81){
-        uart_put_string("looking for question number");
         uart_get_string(buffer,20);
 
         int dq = atoi(buffer);
@@ -101,34 +101,41 @@ int main(void) {
         display_responder();
     }
 
-    uart_get_string(buffer, 20);
-    
-  	compare = atoi(buffer);
-
-    int response = 2;
-    char* response_c;
-    for (;;){
     if (compare == 82){
-        uart_put_string("Looking for a set pin");
-        if (BIT_IS_SET(PINC, 0)){
-                response = 0;
-                itoa(response,response_c,10);
-                uart_put_string(response_c);
-                display_response_blink(response, 6, 200);
-                break;
-            }
-            if (BIT_IS_SET(PINC, 1)){
-                response = 1;
-                itoa(response,response_c,10);
-                uart_put_string(response_c);
-                display_response_blink(response, 6, 200);
-                break;
-            }
-    }
+        uart_get_string(buffer, 20);
+        int asw = atoi(buffer);
+
+        display_response_blink(asw, 6 , 200);
     }
 
+    if (compare == 83){
 
-    
+        uart_get_string(buffer, 20);
+        int a1 = atoi(buffer);
+
+        uart_get_string(buffer, 20);
+        int a2 = atoi(buffer);
+
+        display_answer(a1, a2);
+    }
+
+    if (compare == 84){
+
+        display_win();
+
+    }
+
+    if (compare == 85){
+        
+        uart_get_string(buffer, 20);
+        int score = atoi(buffer);
+         
+        display_loss();
+
+    }
+
+    _delay_ms(10);
+    }
 }
 
 

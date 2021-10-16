@@ -293,22 +293,26 @@ void question_cycle(void){
             if (response_a == 2){
             if (BIT_IS_SET(PINC, 0)){
                 response_a = 0;
-                uart_put_string("You 1");
+
             }
             if (BIT_IS_SET(PINC, 1)){
                 response_a = 1;
-                uart_put_string("Me 1");
+
             }
             }
 
             if (response_b == 2){
             if (BIT_IS_SET(PINC, 3)){
                 response_b = 0;
-                uart_put_string("You 2");
+                uart_put_string("82")
+                uart_put_string("0")
+
             }
             if (BIT_IS_SET(PINC, 2)){
                 response_b = 1;
-                uart_put_string("Me 1");
+                uart_put_string("82")
+                uart_put_string("1")
+
             }
             }
 
