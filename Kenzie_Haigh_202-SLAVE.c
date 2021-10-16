@@ -62,7 +62,7 @@ void question_cycle(void);
 void display_answer(int a1, int a2);
 void display_loss(void);
 void display_win(void);
-void __init__(void);
+
 
 int score = 0;
 int obj = 3; //Currenly hard coded, need to be dynamic later
@@ -132,19 +132,6 @@ int main(void) {
 }
 
 
-void __init__(void){ //Not Initalisation but the british way of say isnt it
-
-CLEAR_BIT(DDRC, 0); //Set pin A0 and A1 to input
-CLEAR_BIT(DDRC, 1);
-
-TCCR0A = 0;
-TCCR0B = 4;
-TIMSK0 = 1;
-
-
-sei(); //Interupts
-
-}
 
 
 void display_question(int num){
@@ -244,7 +231,7 @@ void display_win(void){
 void start(void) {
 
 
-    __init__();
+   
 
     // Initialises LCD
     lcd.begin(16, 2);

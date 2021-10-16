@@ -107,8 +107,10 @@ int main(void) {
 
 void __init__(void){ //Not Initalisation but the british way of say isnt it
 
-CLEAR_BIT(DDRC, 0); //Set pin A0 and A1 to input
+CLEAR_BIT(DDRC, 0); //Set pin A0 through A3 to input
 CLEAR_BIT(DDRC, 1);
+CLEAR_BIT(DDRC, 2);
+CLEAR_BIT(DDRC, 3);
 
 TCCR0A = 0;
 TCCR0B = 4;
@@ -281,24 +283,47 @@ void question_cycle(void){
         display_responder();
         //_delay_ms(5000);
 
-        int response = 2;
+        int response_a = 2;
+        int response_b = 2;
         
         for (;;){
-            uart_put_string("82"); //Request an answer
+
+
+
+            if (response_a == 2){
             if (BIT_IS_SET(PINC, 0)){
-                response = 0;
-                break;
+                response_a = 0;
+                uart_put_string("You 1");
             }
             if (BIT_IS_SET(PINC, 1)){
-                response = 1;
+                response_a = 1;
+                uart_put_string("Me 1");
+            }
+            }
+
+            if (response_b == 2){
+            if (BIT_IS_SET(PINC, 0)){
+                response_b = 0;
+                uart_put_string("You 2");
+            }
+            if (BIT_IS_SET(PINC, 1)){
+                response_b = 1;
+                uart_put_string("Me 1");
+            }
+            }
+
+            if (response_a != 2 && response_b != 2){
                 break;
             }
+
+
+
             _delay_ms(10); //Make it chug less but could also mean that it misses button presses
         }
 
-        display_response_blink(response, 6, 200);
+        display_response_blink(response_a, 6, 200);
         _delay_ms(1000);
-        display_answer(response, 1);
+        display_answer(response_a, response_b);
 
         if (score == obj){
             display_win();
