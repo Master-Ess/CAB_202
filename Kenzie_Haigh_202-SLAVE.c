@@ -113,10 +113,8 @@ int main(void) {
         uart_get_string(buffer, 20);
         int a1 = atoi(buffer);
 
-        uart_get_string(buffer, 20);
-        int a2 = atoi(buffer);
 
-        display_answer(a1, a2);
+        display_answer(a1);
     }
 
     if (compare == 84){
@@ -194,10 +192,10 @@ void display_response_blink(int ans, int times, int delay){
     
 }
 
-void display_answer(int a1, int a2){
+void display_answer(int a1){
     lcd.clear();
 
-    if (a1 != a2){
+    if (a1 == 1){
         lcd.setCursor(5, 0);
         lcd.print("Same!");
         score++;
@@ -206,7 +204,7 @@ void display_answer(int a1, int a2){
         lcd.setCursor(3, 0);
         lcd.print("Different!");
     }
-    _delay_ms(2000);
+    
 }
 
 void display_loss(void){

@@ -241,11 +241,13 @@ void display_answer(int a1, int a2){
     if (a1 != a2){
         lcd.setCursor(5, 0);
         lcd.print("Same!");
+        uart_put_string("1");
         score++;
     }
     else{
         lcd.setCursor(3, 0);
         lcd.print("Different!");
+        uart_put_string("2");
     }
     _delay_ms(2000);
 }
@@ -293,10 +295,12 @@ void question_cycle(void){
             if (response_a == 2){
             if (BIT_IS_SET(PINC, 0)){
                 response_a = 0;
+                display_response_blink(response_a, 6, 200);
 
             }
             if (BIT_IS_SET(PINC, 1)){
                 response_a = 1;
+                display_response_blink(response_a, 6, 200);
 
             }
             }
@@ -304,14 +308,14 @@ void question_cycle(void){
             if (response_b == 2){
             if (BIT_IS_SET(PINC, 3)){
                 response_b = 0;
-                uart_put_string("82")
-                uart_put_string("0")
+                uart_put_string("82");
+                uart_put_string("0");
 
             }
             if (BIT_IS_SET(PINC, 2)){
                 response_b = 1;
-                uart_put_string("82")
-                uart_put_string("1")
+                uart_put_string("82");
+                uart_put_string("1");
 
             }
             }
@@ -325,8 +329,9 @@ void question_cycle(void){
             _delay_ms(10); //Make it chug less but could also mean that it misses button presses
         }
 
-        display_response_blink(response_a, 6, 200);
+        
         _delay_ms(1000);
+        uart_put_string("83");
         display_answer(response_a, response_b);
 
         if (score == obj){
