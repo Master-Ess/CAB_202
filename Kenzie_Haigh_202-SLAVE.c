@@ -24,11 +24,9 @@
 #define BIT_VALUE(reg, pin)         (((reg) >> (pin)) & 1)
 #define BIT_IS_SET(reg, pin)        (BIT_VALUE((reg),(pin))==1)
 
-
 //////////////////////////
-//CODE FOR MASTER
+//CODE FOR SLAVE 
 //////////////////////////
-
 
 // initialize the library by associating any needed LCD interface pin
 // with the Arduino pin number it is connected to
@@ -79,29 +77,34 @@ int main(void) {
     start();
     _delay_ms(1000);
 
-
     uart_init();
-  	//PL2---------
-    uart_put_string("Player 2");
-
+    
+    char buffer[64];
+    uart_get_string(buffer, 20);
+    
+    
     lcd.clear();
     lcd.setCursor(0,0);
-    lcd.print("Player 1");
+    lcd.print(buffer);
+    _delay_ms(500);
 
-    _delay_ms(1000);
+    uart_get_string(buffer, 20);
+    uart_put_string(buffer);
+  	
+  	int compare = atoi(buffer);
+	
+  
+    if (compare == 87){
+        uart_put_string("looking for question number");
+        uart_get_string(buffer,20);
 
-    question_cycle();
-    
+        int dq = atoi(buffer);
 
-
-
-    while (1) {
-
-        //loop_ch();
-        _delay_ms(500);
-
-
+        display_question(dq);
+        display_responder();
     }
+
+    
 }
 
 
@@ -120,69 +123,9 @@ sei(); //Interupts
 }
 
 
-
-ISR(TIM0_OVF_vect) { //Usually: TIMER0_OVF_vect
-
-
-    //You / Left button
-
-    counter_you = (((counter_you << 1) & 0b00000111) | ((PINC >> 0) & 1));
-
-    if (counter_you == 0b00000111) {
-        is_pressed_you = 1;
-    }
-
-    if (counter_you == 0) {
-        is_pressed_you = 0;
-    }
-
-    //Me / Right Button
-
-    counter_me = (((counter_me << 1) & 0b00000111) | ((PINC >> 1) & 1));
-
-    if (counter_me == 0b00000111) {
-        is_pressed_me = 1;
-    }
-
-    if (counter_you == 0) {
-        is_pressed_me = 0;
-    }
-}
-
-void start(void) {
-
-
-    __init__();
-
-    // Initialises LCD
-    lcd.begin(16, 2);
-
-
-    // Print a message to the LCD 
-    lcd.print("WELCOME TO:");
-    _delay_ms(1000);
-
-    lcd.clear();
-
-  
-
-    lcd.setCursor(5, 0);
-    lcd.print("You or");
-    lcd.setCursor(7, 1);
-    lcd.print("Me?");
-
-}
-
 void display_question(int num){
 
     lcd.clear();
-    
-    uart_put_string("87"); //Display Question
-	
-    char payload[5];
-    itoa(num,payload,10); //Covert Int to char for transmission
-
-    uart_put_string(payload);
 
 
     char *question = friend_qs[num];
@@ -273,44 +216,29 @@ void display_win(void){
     lcd.print("Well Done!");
 }
 
-void question_cycle(void){
 
-    int i = 0;
-    while (i < f_qs_nm){
-        display_question(i); // currently always gives question 2???
-        display_responder();
-        //_delay_ms(5000);
+void start(void) {
 
-        int response = 2;
-        
-        for (;;){
-            
-            if (BIT_IS_SET(PINC, 0)){
-                response = 0;
-                break;
-            }
-            if (BIT_IS_SET(PINC, 1)){
-                response = 1;
-                break;
-            }
-            _delay_ms(10); //Make it chug less but could also mean that it misses button presses
-        }
 
-        display_response_blink(response, 6, 200);
-        _delay_ms(1000);
-        display_answer(response, 1);
+    __init__();
 
-        if (score == obj){
-            display_win();
-            break;
-        }
-        if (i == f_qs_nm){
-            display_loss();
-            break;
-        }
+    // Initialises LCD
+    lcd.begin(16, 2);
 
-        i++;
-    }
+
+    // Print a message to the LCD 
+    lcd.print("WELCOME TO:");
+    _delay_ms(1000);
+
+    lcd.clear();
+
+  
+
+    lcd.setCursor(5, 0);
+    lcd.print("You or");
+    lcd.setCursor(7, 1);
+    lcd.print("Me?");
+
 }
 
 //UART FUNCTIONS
@@ -346,7 +274,6 @@ int uart_getbyte(unsigned char* buffer) {
 }
 
 //STRING CONSTRUCT AND DECONSTRUCT
-
 void uart_put_string(char s[]) {
     int i = 0;
     while (s[i] != 0) {
@@ -361,6 +288,7 @@ void uart_put_string(char s[]) {
 void uart_get_string(char buff[], int buff_len) {
     int i = 0;
     unsigned char ch;
+  	
     for (;;) {
         while (!uart_getbyte(&ch)) {}
         if (ch == 0) {
