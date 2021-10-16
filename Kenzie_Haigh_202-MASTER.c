@@ -84,6 +84,12 @@ int main(void) {
   	//PL2---------
     uart_put_string("Player 2");
 
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Player 1");
+
+    _delay_ms(1000);
+
     question_cycle();
     
 
@@ -170,6 +176,13 @@ void start(void) {
 void display_question(int num){
 
     lcd.clear();
+    
+    uart_put_string("DQ"); //Display Question
+
+    char payload[5];
+    itoa(num,payload,10); //Covert Int to char for transmission
+
+    uart_put_string(payload);
 
 
     char *question = friend_qs[num];

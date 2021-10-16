@@ -24,6 +24,7 @@
 #define BIT_VALUE(reg, pin)         (((reg) >> (pin)) & 1)
 #define BIT_IS_SET(reg, pin)        (BIT_VALUE((reg),(pin))==1)
 
+
 //////////////////////////
 //CODE FOR SLAVE 
 //////////////////////////
@@ -81,21 +82,27 @@ int main(void) {
     
     char buffer[64];
     uart_get_string(buffer, 20);
-    uart_put_string(buffer);
+    
     
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print(buffer);
+    _delay_ms(500);
 
+    uart_get_string(buffer, 20);
+    
 
+    if (buffer == "DQ"){
+        uart_put_string("looking for question number");
+        uart_get_string(buffer,20);
 
-    while (1) {
+        int dq = atoi(buffer);
 
-        //loop_ch();
-        _delay_ms(500);
-
-
+        display_question(dq);
+        display_responder();
     }
+
+    
 }
 
 
@@ -111,6 +118,100 @@ TIMSK0 = 1;
 
 sei(); //Interupts
 
+}
+
+
+void display_question(int num){
+
+    lcd.clear();
+
+
+    char *question = friend_qs[num];
+    int question_start = 7 - (strlen(question)/2); //AUTO CENTER 
+
+    lcd.setCursor(question_start, 0);
+    lcd.print(question);
+    lcd.print("?");
+
+
+
+}
+
+
+void display_responder(void){
+    lcd.setCursor(1,1);
+    lcd.print("You");
+
+    lcd.setCursor(8,1);
+    lcd.print("/");
+
+    lcd.setCursor(12, 1);
+    lcd.print("Me");
+}
+
+
+void display_response(int ans){
+    lcd.clear();
+
+    lcd.setCursor(6, 1);
+    lcd.print(aswrs[ans]);
+    
+}
+
+void display_response_blink(int ans, int times, int delay){
+
+    display_response(ans);
+
+    int i = 0;
+
+    while (i <= times){
+    _delay_ms(delay);
+    lcd.clear();
+    _delay_ms(delay);
+    display_response(ans);
+    i++;
+    }
+    
+}
+
+void display_answer(int a1, int a2){
+    lcd.clear();
+
+    if (a1 != a2){
+        lcd.setCursor(5, 0);
+        lcd.print("Same!");
+        score++;
+    }
+    else{
+        lcd.setCursor(3, 0);
+        lcd.print("Different!");
+    }
+    _delay_ms(2000);
+}
+
+void display_loss(void){
+    lcd.clear();
+    lcd.setCursor(2, 0);
+    lcd.print("Better Luck");
+    lcd.setCursor(2,1);
+    lcd.print("Next Time!");
+
+    _delay_ms(2000);
+
+    lcd.clear();
+    lcd.setCursor(2, 0);
+    lcd.print("Your Score:");
+    lcd.setCursor(6, 1);
+    char s_score[3];
+    itoa(score,s_score,10);
+    lcd.print(s_score );
+    lcd.print("/3");
+}
+
+void display_win(void){
+    lcd.clear();
+    lcd.setCursor(3, 0);
+    lcd.print("Well Done!");
 }
 
 
