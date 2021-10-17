@@ -105,7 +105,7 @@ int main(void) {
         uart_get_string(buffer, 20);
         int asw = atoi(buffer);
 
-        display_response_blink(asw, 6 , 200);
+        display_response(asw);
     }
 
     if (compare == 83){

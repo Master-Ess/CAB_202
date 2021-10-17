@@ -267,6 +267,8 @@ void display_loss(void){
     lcd.setCursor(6, 1);
     char s_score[3];
     itoa(score,s_score,10);
+    uart_put_string("85");
+    uart_put_string(s_score);
     lcd.print(s_score );
     lcd.print("/3");
 }
@@ -295,12 +297,12 @@ void question_cycle(void){
             if (response_a == 2){
             if (BIT_IS_SET(PINC, 0)){
                 response_a = 0;
-                display_response_blink(response_a, 6, 200);
+                display_response(response_a);
 
             }
             if (BIT_IS_SET(PINC, 1)){
                 response_a = 1;
-                display_response_blink(response_a, 6, 200);
+                display_response(response_a);
 
             }
             }
@@ -336,10 +338,12 @@ void question_cycle(void){
 
         if (score == obj){
             display_win();
+            uart_put_string("84");
             break;
         }
-        if (i == f_qs_nm){
+        if (i == (f_qs_nm - 1)){
             display_loss();
+            
             break;
         }
 
