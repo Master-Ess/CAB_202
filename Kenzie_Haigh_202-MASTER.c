@@ -76,11 +76,16 @@ uint8_t is_pressed_me = 0; //A1
 
 int main(void) {
 
+
+    void uart_init(void);
+    void uart_put_string(char s[]);
+
     start();
     _delay_ms(1000);
 
 
     uart_init();
+    analog_init(4);
   	//PL2---------
     uart_put_string("Player 2");
 
@@ -95,10 +100,10 @@ int main(void) {
 
 
 
-    while (1) {
+    while (1) { 
 
-        //loop_ch();
-        _delay_ms(500);
+         ADC_display();
+
 
 
     }
@@ -111,6 +116,9 @@ CLEAR_BIT(DDRC, 0); //Set pin A0 through A3 to input
 CLEAR_BIT(DDRC, 1);
 CLEAR_BIT(DDRC, 2);
 CLEAR_BIT(DDRC, 3);
+CLEAR_BIT(DDRC, 4); //PINS for period and duty cycle change
+CLEAR_BIT(DDRC, 5);
+
 
 TCCR0A = 0;
 TCCR0B = 4;
@@ -123,38 +131,14 @@ sei(); //Interupts
 
 
 
-ISR(TIM0_OVF_vect) { //Usually: TIMER0_OVF_vect
-
-
-    //You / Left button
-
-    counter_you = (((counter_you << 1) & 0b00000111) | ((PINC >> 0) & 1));
-
-    if (counter_you == 0b00000111) {
-        is_pressed_you = 1;
-    }
-
-    if (counter_you == 0) {
-        is_pressed_you = 0;
-    }
-
-    //Me / Right Button
-
-    counter_me = (((counter_me << 1) & 0b00000111) | ((PINC >> 1) & 1));
-
-    if (counter_me == 0b00000111) {
-        is_pressed_me = 1;
-    }
-
-    if (counter_you == 0) {
-        is_pressed_me = 0;
-    }
-}
 
 void start(void) {
 
 
     __init__();
+
+    analog_init(128);
+
 
     // Initialises LCD
     lcd.begin(16, 2);
@@ -176,6 +160,8 @@ void start(void) {
 }
 
 void display_question(int num){
+
+    void uart_put_string(char s[]);
 
     lcd.clear();
     
@@ -236,6 +222,9 @@ void display_response_blink(int ans, int times, int delay){
 }
 
 void display_answer(int a1, int a2){
+
+    void uart_put_string(char s[]);
+
     lcd.clear();
 
     if (a1 != a2){
@@ -253,6 +242,9 @@ void display_answer(int a1, int a2){
 }
 
 void display_loss(void){
+
+    void uart_put_string(char s[]);
+
     lcd.clear();
     lcd.setCursor(2, 0);
     lcd.print("Better Luck");
@@ -280,6 +272,10 @@ void display_win(void){
 }
 
 void question_cycle(void){
+
+    void uart_put_string(char s[]);
+
+   
 
     int i = 0;
     while (i < f_qs_nm){
@@ -349,6 +345,118 @@ void question_cycle(void){
 
         i++;
     }
+}
+
+//ADC --> Anyone else alawys think ACDC?
+
+void analog_init(uint8_t division_factor) {
+	// INSERT CODE
+
+	ADMUX = 0b01000000;
+
+	ADCSRA = 0b00000000;
+
+	ADCSRA = ((1 << ADEN)); //EDEN
+
+	CLEAR_BIT(ADCSRA, ADPS0);
+	CLEAR_BIT(ADCSRA, ADPS1);
+	CLEAR_BIT(ADCSRA, ADPS2);
+
+	switch (division_factor)
+	{
+	case 2:
+		SET_BIT(ADCSRA, ADPS0);
+		CLEAR_BIT(ADCSRA, ADPS1);
+		CLEAR_BIT(ADCSRA, ADPS2);
+		break;
+	case 4:
+		CLEAR_BIT(ADCSRA, ADPS0);
+		SET_BIT(ADCSRA, ADPS1);
+		CLEAR_BIT(ADCSRA, ADPS2);
+		break;
+	case 8:
+		SET_BIT(ADCSRA, ADPS0);
+		SET_BIT(ADCSRA, ADPS1);
+		CLEAR_BIT(ADCSRA, ADPS2);
+		break;
+	case 16:
+		CLEAR_BIT(ADCSRA, ADPS0);
+		CLEAR_BIT(ADCSRA, ADPS1);
+		SET_BIT(ADCSRA, ADPS2);
+		break;
+	case 32:
+		SET_BIT(ADCSRA, ADPS0);
+		CLEAR_BIT(ADCSRA, ADPS1);
+		SET_BIT(ADCSRA, ADPS2);
+		break;
+	case 64:
+		CLEAR_BIT(ADCSRA, ADPS0);
+		SET_BIT(ADCSRA, ADPS1);
+		SET_BIT(ADCSRA, ADPS2);
+		break;
+	case 128:
+		SET_BIT(ADCSRA, ADPS0);
+		SET_BIT(ADCSRA, ADPS1);
+		SET_BIT(ADCSRA, ADPS2);
+		break;
+	default:
+		CLEAR_BIT(ADCSRA, ADPS0);
+		CLEAR_BIT(ADCSRA, ADPS1);
+		CLEAR_BIT(ADCSRA, ADPS2);
+		break;
+	}
+
+	
+
+
+}
+
+uint16_t analog_read(uint8_t channel) {
+	ADMUX = ADMUX ^ channel;
+
+	
+	ADCSRA |= (1 << ADSC);
+
+	
+#if !__AMS__
+	while (ADCSRA & (1 << ADSC));
+#endif
+
+	return (ADC);
+}
+
+
+
+void ADC_display(void){
+
+uint16_t dpot = analog_read(4); //duty cycle
+uint16_t ppot = analog_read(5); //period
+
+ int duty_per = 1000*dpot/1024;
+ int freq = 1000/ppot;  //NOT NEEDED
+
+ int high = duty_per*ppot/1024;
+ int low = ppot - high;
+
+for (int t; t < 20 ; t++){
+
+    SET_BIT(PIND,2);
+    _delay_ms(high);
+    CLEAR_BIT(PIND,2);
+    _delay_ms(low);
+
+
+    Serial.println();
+    Serial.print("frequency ");
+    Serial.print(freq);
+    Serial.println(" hertz");
+    Serial.print("period ");
+    Serial.print(ppot);
+    Serial.println(" miliseconds");
+    Serial.print("duty % ");
+    Serial.println(duty_per);
+}
+
 }
 
 //UART FUNCTIONS

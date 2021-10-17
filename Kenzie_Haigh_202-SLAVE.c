@@ -54,17 +54,16 @@ char aswrs[2][8] = {
 
 
 void start(void);
-void display_question(void);
+void display_question(int num);
 void display_responder(void);
 void display_response(int ans);
 void display_response_blink(int ans, int times, int delay);
 void question_cycle(void);
-void display_answer(int a1, int a2);
+void display_answer(int a1);
 void display_loss(void);
 void display_win(void);
 
 
-int score = 0;
 int obj = 3; //Currenly hard coded, need to be dynamic later
 
 uint8_t counter_you = 0;
@@ -73,6 +72,10 @@ uint8_t is_pressed_you = 0; //A0
 uint8_t is_pressed_me = 0; //A1
 
 int main(void) {
+
+    void uart_init(void);
+    void uart_put_string(char s[]);
+    void uart_get_string(char buff[], int buff_len);
 
     start();
     _delay_ms(1000);
@@ -125,8 +128,7 @@ int main(void) {
 
     if (compare == 85){
         
-        uart_get_string(buffer, 20);
-        int score = atoi(buffer);
+        
          
         display_loss();
 
@@ -139,7 +141,7 @@ int main(void) {
 
 
 
-void display_question(int num){
+void  display_question(int num){
 
     lcd.clear();
 
@@ -198,7 +200,6 @@ void display_answer(int a1){
     if (a1 == 1){
         lcd.setCursor(5, 0);
         lcd.print("Same!");
-        score++;
     }
     else{
         lcd.setCursor(3, 0);
@@ -208,6 +209,14 @@ void display_answer(int a1){
 }
 
 void display_loss(void){
+
+    void uart_get_string(char buff[], int buff_len);
+
+    char buffer[20];
+    
+    uart_get_string(buffer, 20);
+    int score = atoi(buffer);
+
     lcd.clear();
     lcd.setCursor(2, 0);
     lcd.print("Better Luck");
