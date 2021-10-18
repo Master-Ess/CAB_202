@@ -89,7 +89,7 @@ int main(void) {
 
     uart_init();
     
-    uint16_t dpot = analog_read(4);
+   
     
   	//PL2---------
     uart_put_string("Player 2");
@@ -104,12 +104,17 @@ int main(void) {
   	
   	uint16_t divider = 256;
 	pwm_init(divider);
-s
+
 	for (;;) {
-        uint16_t dpot = (analog_read(4) / 10);
-        
-		pwm_write(256 * dpot);
-        _delay_ms(500);
+        char temp_buf[64];
+        uint16_t dpot = (analog_read(4) / 3.8);
+        itoa(dpot, (char*)temp_buf, 10);
+    	Serial.println();
+		Serial.print(temp_buf);
+      	int duty_cycle = (dpot);
+		pwm_write(duty_cycle);
+        _delay_ms(250);
+       	dpot = (analog_read(4));
        
 	}
   
