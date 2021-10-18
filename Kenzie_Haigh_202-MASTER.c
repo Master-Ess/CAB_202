@@ -14,8 +14,16 @@
 #define B0 8
 #define D4 4
 #define D5 5
-#define D6 6
+#define D6 3
 #define D7 7
+
+// #include <LiquidCrystal.h>
+// #define B1 9
+// #define B0 8
+// #define D4 4
+// #define D5 5
+// #define D6 6
+// #define D7 7
 
 // general defines
 #define SET_BIT(reg, pin)           (reg) |= (1 << (pin))
@@ -86,6 +94,7 @@ int main(void) {
 
     uart_init();
     analog_init(4);
+    pwm_init(4);
   	//PL2---------
     uart_put_string("Player 2");
 
@@ -102,8 +111,8 @@ int main(void) {
 
     while (1) { 
 
-         ADC_display();
-
+         //ADC_display();
+        pwm_write(1)
 
 
     }
@@ -458,6 +467,65 @@ for (int t; t < 20 ; t++){
 }
 
 }
+
+//PWM FUNCTIONS
+
+void pwm_init(uint16_t division_factor) {
+#define SET_BIT(reg, pin)           (reg) |= (1 << (pin))
+	//  Configure the digital I/O pin corresponding to OCR0A for output. 
+	//  Modify at most one pin in the DDR. DDRD 6
+	SET_BIT(DDRD, 6);
+	//  Update the value of TCCR0A so that register OC0A will clear on compare 
+	//  match. //TCCR0A = 0b10000000;
+	TCCR0A = 0b01000000;
+	//  Update TCCR0B to disable Force Output Compare functionality.TCCR0B = 0b11000000;
+	TCCR0B = 0b11000000;
+	//  Update TCCR0B to ensure that the clock pre-scaler matches the 
+	//  designated division factor.
+	CLEAR_BIT(TCCR0B, CS00);
+	CLEAR_BIT(TCCR0B, CS01);
+	CLEAR_BIT(TCCR0B, CS02);
+
+	//TCCR0B = (division_factor << CS02) | (division_factor << CS01) | (division_factor << CS00);
+
+	switch (division_factor)
+	{
+	case 1:
+		SET_BIT(TCCR0B, CS00);
+		CLEAR_BIT(TCCR0B, CS01);
+		CLEAR_BIT(TCCR0B, CS02);
+		break;
+	case 8:
+		CLEAR_BIT(TCCR0B, CS00);
+		SET_BIT(TCCR0B, CS01);
+		CLEAR_BIT(TCCR0B, CS02);
+		break;
+	case 64:
+		SET_BIT(TCCR0B, CS00);
+		SET_BIT(TCCR0B, CS01);
+		CLEAR_BIT(TCCR0B, CS02);
+		break;
+	case 256:
+		CLEAR_BIT(TCCR0B, CS00);
+		CLEAR_BIT(TCCR0B, CS01);
+		SET_BIT(TCCR0B, CS02);
+		break;
+	case 1024:
+		SET_BIT(TCCR0B, CS00);
+		CLEAR_BIT(TCCR0B, CS01);
+		SET_BIT(TCCR0B, CS02);
+		break;
+	default:
+		CLEAR_BIT(TCCR0B, CS00);
+		CLEAR_BIT(TCCR0B, CS01);
+		CLEAR_BIT(TCCR0B, CS02);
+		break;
+	}
+}
+    void pwm_write(uint8_t duration) {
+	OCR0A = duration;
+}
+
 
 //UART FUNCTIONS
 
