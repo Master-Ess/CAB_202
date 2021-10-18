@@ -88,7 +88,8 @@ int main(void) {
 
 
     uart_init();
-    analog_init(8);
+    
+    uint16_t dpot = analog_read(4);
     
   	//PL2---------
     uart_put_string("Player 2");
@@ -98,8 +99,21 @@ int main(void) {
     lcd.print("Player 1");
 
     _delay_ms(1000);
-
-    question_cycle();
+    
+    analog_init(256);
+  	
+  	uint16_t divider = 256;
+	pwm_init(divider);
+s
+	for (;;) {
+        uint16_t dpot = (analog_read(4) / 10);
+        
+		pwm_write(256 * dpot);
+        _delay_ms(500);
+       
+	}
+  
+    //question_cycle();
     
     pwm_write(64);
     _delay_ms(500);
@@ -466,23 +480,23 @@ for (int t; t < 20 ; t++){
 
 //PWM FUNCTIONS
 
-void pwm_write(uint8_t duration) {
-	OCR0A = duration;
-}
-
 void pwm_init(uint16_t division_factor) {
 
-
+	//  Configure the digital I/O pin corresponding to OCR0A for output. 
+	//  Modify at most one pin in the DDR. DDRD 6
 	SET_BIT(DDRD, 6);
-
+	//  Update the value of TCCR0A so that register OC0A will clear on compare 
+	//  match. //TCCR0A = 0b10000000;
 	TCCR0A = 0b10000000;
-	
+	//  Update TCCR0B to disable Force Output Compare functionality.TCCR0B = 0b11000000;
 	TCCR0B = 0b11000000;
-
+	//  Update TCCR0B to ensure that the clock pre-scaler matches the 
+	//  designated division factor.
 	CLEAR_BIT(TCCR0B, CS00);
 	CLEAR_BIT(TCCR0B, CS01);
 	CLEAR_BIT(TCCR0B, CS02);
 
+	//TCCR0B = (division_factor << CS02) | (division_factor << CS01) | (division_factor << CS00);
 
 	switch (division_factor)
 	{
@@ -517,20 +531,23 @@ void pwm_init(uint16_t division_factor) {
 		CLEAR_BIT(TCCR0B, CS02);
 		break;
 	}
-
-
+	
 	SET_BIT(TCCR0A, WGM00);
 	SET_BIT(TCCR0A, COM0A1);
 	SET_BIT(TCCR0A, WGM01);
 	CLEAR_BIT(TCCR0A, COM0A0);
 
 
+
 	CLEAR_BIT(TCCR0B, FOC0B);
 	CLEAR_BIT(TCCR0B, FOC0A);
 	CLEAR_BIT(TCCR0B, WGM02);
 
-	
 }
+void pwm_write(uint8_t duration) {
+	OCR0A = duration;
+}
+
 
 
 //UART FUNCTIONS
