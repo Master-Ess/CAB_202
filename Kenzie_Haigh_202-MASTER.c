@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+
 // LiquidCrystal
 #include <LiquidCrystal.h>
 #define B1 9
@@ -99,6 +100,8 @@ int main(void) {
     lcd.print("Player 1");
 
     _delay_ms(1000);
+
+     question_cycle(); //Comment out if you want to test the osscolosope first -- wow spelling
     
     analog_init(256);
   	
@@ -118,19 +121,8 @@ int main(void) {
        
 	}
   
-    //question_cycle();
-    
-    pwm_write(64);
-    _delay_ms(500);
+   
 
-
-    while (1) { 
-
-        
-        
-
-
-    }
 }
 
 
@@ -143,6 +135,8 @@ CLEAR_BIT(DDRC, 3);
 CLEAR_BIT(DDRC, 4); //PINS for period and duty cycle change
 CLEAR_BIT(DDRC, 5);
 
+
+SET_BIT(DDRB, 5); // PIN for LED - IDK its an afterthought 
 
 TCCR0A = 0;
 TCCR0B = 4;
@@ -226,6 +220,8 @@ void display_response(int ans){
 
     lcd.setCursor(6, 1);
     lcd.print(aswrs[ans]);
+
+    
     
 }
 
@@ -255,6 +251,7 @@ void display_answer(int a1, int a2){
         lcd.setCursor(5, 0);
         lcd.print("Same!");
         uart_put_string("1");
+        SET_BIT(PORTB, PB5);
         score++;
     }
     else{
@@ -303,11 +300,12 @@ void question_cycle(void){
 
     int i = 0;
     while (i < f_qs_nm){
-        display_question(i); // currently always gives question 2???
+        CLEAR_BIT(PORTB, PB5);
+        display_question(i);
         display_responder();
-        //_delay_ms(5000);
+      
 
-        int response_a = 2;
+        int response_a = 2; //Set to garbage, just for my peace of mind lol
         int response_b = 2;
         
         for (;;){
