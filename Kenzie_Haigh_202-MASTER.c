@@ -7,6 +7,7 @@
 #include <util/delay.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <EEPROM.h>
 
 
 // LiquidCrystal
@@ -101,13 +102,15 @@ int main(void) {
 
     _delay_ms(1000);
 
-     question_cycle(); //Comment out if you want to test the osscolosope first -- wow spelling
-    
-    analog_init(256);
+     analog_init(256);
   	
   	uint16_t divider = 256;
 	pwm_init(divider);
 
+
+     question_cycle(); //Comment out if you want to test the osscolosope first -- wow spelling
+    
+   
 	for (;;) {
         char temp_buf[64];
         uint16_t dpot = (analog_read(4) / 3.8);
@@ -251,8 +254,12 @@ void display_answer(int a1, int a2){
         lcd.setCursor(5, 0);
         lcd.print("Same!");
         uart_put_string("1");
-        SET_BIT(PORTB, PB5);
+
+        SET_BIT(PORTB, PB5); //LED
+
         score++;
+
+        pwm_write(score * 86);
     }
     else{
         lcd.setCursor(3, 0);
