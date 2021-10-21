@@ -201,9 +201,13 @@ void display_answer(int a1){
         lcd.setCursor(5, 0);
         lcd.print("Same!");
     }
-    else{
+    else if (a1 == 2) {
         lcd.setCursor(3, 0);
         lcd.print("Different!");
+    }
+    else {
+        lcd.setCursor(5, 0);
+        lcd.print("Time!");
     }
     
 }

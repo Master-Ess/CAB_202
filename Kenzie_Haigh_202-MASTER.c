@@ -33,6 +33,8 @@
 //CODE FOR MASTER
 //////////////////////////
 
+#define FREQ (16000000.0)
+#define PRESCALE (1024.0)
 
 // initialize the library by associating any needed LCD interface pin
 // with the Arduino pin number it is connected to
@@ -71,12 +73,17 @@ void display_win(void);
 void __init__(void);
 
 int score = 0;
-int obj = 3; //Currenly hard coded, need to be dynamic later
+int obj = 3; 
 
-uint8_t counter_you = 0;
-uint8_t counter_me = 0;
-uint8_t is_pressed_you = 0; //A0
-uint8_t is_pressed_me = 0; //A1
+
+uint8_t counter = 0;
+uint8_t is_pressed = 0;
+
+volatile int overflow_counter = 0;
+ 
+ISR(TIMER2_OVF_vect) {
+    overflow_counter ++;
+}
 
 int main(void) {
 
@@ -121,7 +128,9 @@ int main(void) {
 		pwm_write(duty_cycle);
         _delay_ms(250);
        	dpot = (analog_read(4));
-       
+
+        Serial.println();
+        Serial.print(overflow_counter);
 	}
   
    
@@ -136,14 +145,14 @@ CLEAR_BIT(DDRC, 1);
 CLEAR_BIT(DDRC, 2);
 CLEAR_BIT(DDRC, 3);
 CLEAR_BIT(DDRC, 4); //PINS for period and duty cycle change
-CLEAR_BIT(DDRC, 5);
+CLEAR_BIT(DDRC, 5); //ISR test
 
 
 SET_BIT(DDRB, 5); // PIN for LED - IDK its an afterthought 
 
-TCCR0A = 0;
-TCCR0B = 4;
-TIMSK0 = 1;
+TCCR2A = 0;
+TCCR2B = 4;
+TIMSK2 = 1;
 
 
 sei(); //Interupts
@@ -249,8 +258,12 @@ void display_answer(int a1, int a2){
     void uart_put_string(char s[]);
 
     lcd.clear();
-
-    if (a1 != a2){
+    if (a1 == 3){
+        lcd.setCursor(5, 0);
+        lcd.print("Time!");
+        uart_put_string("3");
+    }
+    else if (a1 != a2){
         lcd.setCursor(5, 0);
         lcd.print("Same!");
         uart_put_string("1");
@@ -314,7 +327,7 @@ void question_cycle(void){
 
         int response_a = 2; //Set to garbage, just for my peace of mind lol
         int response_b = 2;
-        
+        overflow_counter = 0;
         for (;;){
 
 
@@ -346,6 +359,14 @@ void question_cycle(void){
 
             }
             }
+            double time = ( overflow_counter * 256.0 + TCNT0 ) * PRESCALE  / FREQ;
+
+            if (time > 130){ //~10 seconds
+                response_a = 3;
+                response_b = 3;
+                break;
+
+            }
 
             if (response_a != 2 && response_b != 2){
                 break;
@@ -358,7 +379,9 @@ void question_cycle(void){
 
         
         _delay_ms(1000);
+
         uart_put_string("83");
+        
         display_answer(response_a, response_b);
 
         if (score == obj){
@@ -621,3 +644,9 @@ void uart_get_string(char buff[], int buff_len) {
     buff[i] = 0;
 
 }
+
+
+//ISR CODE --> NEED CHECK if __AMS__ for TIM/TIMER compatoblity. Nice spelling
+
+
+
