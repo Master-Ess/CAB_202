@@ -76,12 +76,58 @@ int score = 0;
 int obj = 3; 
 
 
-uint8_t counter = 0;
-uint8_t is_pressed = 0;
+uint8_t counter_1 = 0;          // MASTER YOU
+uint8_t is_pressed_1 = 0;
+uint8_t counter_2 = 0;          // MASTER ME
+uint8_t is_pressed_2 = 0;
+uint8_t counter_3 = 0;          // SLAVE YOU 
+uint8_t is_pressed_3 = 0;
+uint8_t counter_4 = 0;          // SLAVE ME
+uint8_t is_pressed_4 = 0;
 
 volatile int overflow_counter = 0;
  
 ISR(TIMER2_OVF_vect) {
+
+    
+
+     counter_1 = (((counter_1 << 1) & 0b00000111) | ((PINC >> 0) & 1)); // MASTER YOU
+    if (counter_1 == 0b00000111) {
+        is_pressed_1 = 1;
+    }
+    if (counter_1 == 0) {
+        is_pressed_1 = 0;
+    }
+
+    counter_2 = (((counter_2 << 1) & 0b00000111) | ((PINC >> 1) & 1));  // MASTER ME
+    if (counter_2 == 0b00000111) {
+        is_pressed_2 = 1;
+    }
+    if (counter_2 == 0) {
+        is_pressed_2 = 0;
+    }
+
+
+    counter_3 = (((counter_3 << 1) & 0b00000111) | ((PINC >> 2) & 1));  // SLAVE YOU 
+    if (counter_3 == 0b00000111) {
+        is_pressed_3 = 1;
+    }
+    if (counter_3 == 0) {
+        is_pressed_3 = 0;
+    }
+
+
+    counter_4 = (((counter_4 << 1) & 0b00000111) | ((PINC >> 3) & 1)); // SLAVE ME
+    if (counter_4 == 0b00000111) {
+        is_pressed_4 = 1;
+    }
+    if (counter_4 == 0) {
+        is_pressed_4 = 0;
+    }
+
+
+
+    //TIMER
     overflow_counter ++;
 }
 
@@ -119,6 +165,7 @@ int main(void) {
     
    
 	for (;;) {
+
         char temp_buf[64];
         uint16_t dpot = (analog_read(4) / 3.8);
         itoa(dpot, (char*)temp_buf, 10);
@@ -333,12 +380,12 @@ void question_cycle(void){
 
 
             if (response_a == 2){
-            if (BIT_IS_SET(PINC, 0)){
+            if (is_pressed_1 == 1){
                 response_a = 0;
                 display_response(response_a);
 
             }
-            if (BIT_IS_SET(PINC, 1)){
+            if (is_pressed_2 == 1){
                 response_a = 1;
                 display_response(response_a);
 
@@ -346,13 +393,13 @@ void question_cycle(void){
             }
 
             if (response_b == 2){
-            if (BIT_IS_SET(PINC, 3)){
+            if (is_pressed_4 == 1){
                 response_b = 0;
                 uart_put_string("82");
                 uart_put_string("0");
 
             }
-            if (BIT_IS_SET(PINC, 2)){
+            if (is_pressed_3 == 1){
                 response_b = 1;
                 uart_put_string("82");
                 uart_put_string("1");
